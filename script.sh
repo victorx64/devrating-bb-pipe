@@ -8,10 +8,10 @@ BITBUCKET_CLONE_DIR=${BITBUCKET_CLONE_DIR:?'BITBUCKET_CLONE_DIR variable missing
 BITBUCKET_WORKSPACE=${BITBUCKET_WORKSPACE:?'BITBUCKET_WORKSPACE variable missing.'}
 BITBUCKET_REPO_SLUG=${BITBUCKET_REPO_SLUG:?'BITBUCKET_REPO_SLUG variable missing.'}
 BITBUCKET_BRANCH=${BITBUCKET_BRANCH:?'BITBUCKET_BRANCH variable missing.'}
+BASE_BRANCH=${BASE_BRANCH:?'BASE_BRANCH variable missing.'}
 
 # Optional parameters
 DEVRATING_REPOSITORY=${DEVRATING_REPOSITORY:-"$BITBUCKET_WORKSPACE/$BITBUCKET_REPO_SLUG"}
-BASE_BRANCH=${BASE_BRANCH:-"$BITBUCKET_BRANCH"}
 MAX_ADDITIONS=${MAX_ADDITIONS:-"4000"}
 
 send_to_devrating()
@@ -36,7 +36,6 @@ analyze_pr()
   second_commit="$merge_commit"
 
   if [ -z "${merge_commit##$head_commit*}" ] ;then # It's a rebased PR
-    echo "Rebased: $url\n"
     first_commit="$base_commit"
     second_commit="$head_commit"
   fi
@@ -48,16 +47,13 @@ analyze_pr()
   if [ "$MAX_ADDITIONS" -eq "0" ] || [ "$additions" -lt "$MAX_ADDITIONS" ]; then
     send_to_devrating $merged_at $first_commit $second_commit $url
   else
-    echo "Skipped a PR with ${additions} additions. (${url})\n\n"
+    echo "Skipped a PR with ${additions} additions. (${url})"
   fi
 }
 
 request_prs()
 {
-  minus_90_days_year=$(date --date="90 days ago" +"%Y")
-  minus_90_days_month=$(date --date="90 days ago" +"%m")
-  minus_90_days_day=$(date --date="90 days ago" +"%d")
-  merged_after="$minus_90_days_year-$minus_90_days_month-$minus_90_days_day"
+  merged_after=$(date --date "-2160:00" -I) # -90 days from now
 
   url_base_branch=$(jq -rn --arg x $BASE_BRANCH '$x|@uri')
 
@@ -69,7 +65,7 @@ request_prs()
     "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_WORKSPACE}/${BITBUCKET_REPO_SLUG}/pullrequests?fields=values.merge_commit.date,values.merge_commit.hash,values.destination.commit.hash,values.source.commit.hash,values.links.html.href&q=state%3D%22MERGED%22%20AND%20destination.branch.name~%22${url_base_branch}%22%20AND%20updated_on%3E${merged_after}&sort=-updated_on&pagelen=50&page=2" | \
     jq -c -r '.values | .[] | "\(.merge_commit.date) \(.merge_commit.hash) \(.destination.commit.hash) \(.source.commit.hash) \(.links.html.href)"')
 
-  prs=$(echo "$page2\n$page1" | sort)
+  prs=$(printf "$page2\n$page1" | sort)
 
   echo "$prs"
 
@@ -81,9 +77,11 @@ request_prs()
   done
 }
 
+cd $BITBUCKET_CLONE_DIR
+
 request_prs
 
 url_org=$(jq -rn --arg x $DEVRATING_ORGANIZATION '$x|@uri')
 url_repo=$(jq -rn --arg x $DEVRATING_REPOSITORY '$x|@uri')
 
-echo "\nVisit: https://devrating.net/#/repositories/${url_org}/${url_repo}"
+echo "Visit: https://devrating.net/#/repositories/${url_org}/${url_repo}"

@@ -20,8 +20,8 @@ script:
       DEVRATING_ORGANIZATION: "<string>"
       DEVRATING_KEY: "<string>"
       BITBUCKET_APP_PASSWORD: "<string>"
+      BASE_BRANCH: "<string>"
       DEVRATING_REPOSITORY: "<string>" # Optional
-      BASE_BRANCH: "<string>" # Optional
       MAX_ADDITIONS: "<number>" # Optional
 ```
 
@@ -32,8 +32,8 @@ script:
 | DEVRATING_ORGANIZATION (*) | Your Organization_ID. Visit https://devrating.net/#/keys to obtain                                                                   |
 | DEVRATING_KEY (*)          | Your API_Key. Visit https://devrating.net/#/keys to create new                                                                       |
 | BITBUCKET_APP_PASSWORD (*) | Your BitBucket App Password. Visit https://bitbucket.org/account/settings/app-passwords/ to create new. Permit Pull requests reading |
+| BASE_BRANCH (*)            | Your main development branch (usually 'master' or 'main')                                                                            |
 | DEVRATING_REPOSITORY       | The repository name to be shown on devrating.net                                                                                     |
-| BASE_BRANCH                | Your main development branch (usually 'master' or 'main')                                                                            |
 | MAX_ADDITIONS              | Skips PRs with more added lines of code. 4000 by default. "0" — no limits                                                            |
 
 _(*) = required variable._
@@ -53,6 +53,7 @@ script:
       DEVRATING_ORGANIZATION: $DEVRATING_ORGANIZATION
       DEVRATING_KEY: $DEVRATING_KEY
       BITBUCKET_APP_PASSWORD: $BITBUCKET_APP_PASSWORD
+      BASE_BRANCH: "master"
 ```
 
 Advanced example:
@@ -64,12 +65,12 @@ script:
       DEVRATING_ORGANIZATION: $DEVRATING_ORGANIZATION
       DEVRATING_KEY: $DEVRATING_KEY
       BITBUCKET_APP_PASSWORD: $BITBUCKET_APP_PASSWORD
+      BASE_BRANCH: "master"
       DEVRATING_REPOSITORY: "foo/bar" # Optional
-      BASE_BRANCH: "master" # Optional
       MAX_ADDITIONS: "4000" # Optional
 ```
 
 ## Support
 
-It should be clear what to do. If not, ask us in
+It should be clear how to use. If not, ask us in
 our [Telegram chat](https://t.me/devratingchat).
